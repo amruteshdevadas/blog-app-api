@@ -1,33 +1,40 @@
 const express = require("express");
+const cors = require("cors");
+const { articles } = require("./utils");
 
 const app = express();
 const PORT = 3000;
 
-app.get("/", (req, res) => {
+app.use(cors());
+
+app.get("/blog", (req, res) => {
   res.status(200);
-  res.send("Hello World!");
+  res.send(articles);
 });
 
-app.get("/:id", (req, res) => {
+app.get("/blog/:id", (req, res) => {
   const id = req.params.id;
   res.status(200);
-  res.send(id);
+  const singleArticle = articles.find((a) => a.id == id);
+  res.send(singleArticle);
 });
 
-app.post("/", (req, res) => {
+app.post("/blog", (req, res) => {
+  const payload = req.payload;
+  res.status(200);
+  articles.push(payload);
+  res.send(payload?.title);
+});
+
+app.put("/blog/:id", (req, res) => {
   const payload = req.payload;
   res.status(200);
   res.send(payload?.title);
 });
 
-app.put("/:id", (req, res) => {
-  const payload = req.payload;
-  res.status(200);
-  res.send(payload?.title);
-});
-
-app.delete("/:id", (req, res) => {
+app.delete("/blog/:id", (req, res) => {
   const id = req.params.id;
+  articles.filter((a) => a.id === id);
   res.status(200);
   res.send(id);
 });
