@@ -1,11 +1,34 @@
 const express = require("express");
 const cors = require("cors");
-const { articles } = require("./utils");
 
 const app = express();
 const PORT = 3000;
 
 app.use(cors());
+
+app.use(express.json());
+
+let articles = [
+  {
+    id: 1,
+    title: "How to Build a React App",
+    description:
+      "This is a simple guide to building your first React app from scratch.",
+    image:
+      "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRxb2dRBbhCJkKcTyHdjXLy8ENOneTi-BhSQg&s",
+    content: `
+        <p>This is a simple guide to building your first React app. React is a powerful library for building user interfaces.</p>
+        <p>In this tutorial, we will go step by step to create a simple application that will display a list of items, allowing you to interact with it.</p>
+        <p>First, we need to install React and set up a development environment. You can do this by using Create React App, which is a command-line tool to set up everything for you.</p>
+      `,
+    author: {
+      name: "John Doe",
+      bio: "Frontend developer and React enthusiast. Writing about modern web development and best practices.",
+      avatar: "",
+    },
+    publishedDate: "March 1, 2025",
+  },
+];
 
 app.get("/blog", (req, res) => {
   res.status(200);
@@ -20,23 +43,55 @@ app.get("/blog/:id", (req, res) => {
 });
 
 app.post("/blog", (req, res) => {
-  const payload = req.payload;
-  res.status(200);
-  articles.push(payload);
-  res.send(payload?.title);
+  try {
+    const payload = req.body;
+    payload.id = articles?.length + 1;
+    articles.push(payload);
+    res.status(200);
+    res.json({ title: payload?.title });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Internal Server Error" });
+  }
 });
 
 app.put("/blog/:id", (req, res) => {
-  const payload = req.payload;
-  res.status(200);
-  res.send(payload?.title);
+  try {
+    const payload = req.body;
+    const id = req.params?.id;
+
+    // Find the article by id and update it
+    let updated = false;
+
+    articles = articles.map((item) => {
+      if (item.id == id) {
+        updated = true;
+        return { ...item, ...payload };
+      }
+      return item;
+    });
+
+    if (updated) {
+      res.status(200).json({ message: "Data successfully updated!" });
+    } else {
+      res.status(404).json({ message: "Blog not found!" });
+    }
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Something went wrong!" });
+  }
 });
 
 app.delete("/blog/:id", (req, res) => {
-  const id = req.params.id;
-  articles.filter((a) => a.id === id);
-  res.status(200);
-  res.send(id);
+  try {
+    const id = req.params.id;
+    articles.filter((a) => a.id !== id);
+    res.status(200);
+    res.send(id);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Something went wrong!" });
+  }
 });
 
 app.use((req, res, err) => {
