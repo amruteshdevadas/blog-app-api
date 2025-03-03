@@ -93,9 +93,14 @@ app.put("/blog/:id", (req, res) => {
 app.delete("/blog/:id", (req, res) => {
   try {
     const id = req.params.id;
-    articles.filter((a) => a.id !== id);
-    res.status(200);
-    res.send(id);
+    const initialLength = articles.length;
+    // Filter out the article with the given ID
+    articles = articles.filter((a) => a.id != id);
+    // If no article was removed, send a 404 response
+    if (articles.length === initialLength) {
+      return res.status(404).json({ message: "Blog not found!" });
+    }
+    res.status(200).json({ message: "Blog deleted successfully", id });
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: "Something went wrong!" });
