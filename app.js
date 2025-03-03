@@ -31,8 +31,16 @@ let articles = [
 ];
 
 app.get("/blog", (req, res) => {
-  res.status(200);
-  res.send(articles);
+  const { tag } = req.query; // Get query param "tag"
+
+  // Filter articles where title includes the tag (case-insensitive)
+  const filteredArticles = tag
+    ? articles.filter((article) =>
+        article.title.toLowerCase().includes(tag.toLowerCase())
+      )
+    : articles; // If no tag is provided, return all articles
+
+  res.status(200).json(filteredArticles);
 });
 
 app.get("/blog/:id", (req, res) => {
